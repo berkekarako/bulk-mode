@@ -1,32 +1,6 @@
 /* ============ BULK MODE — uygulama mantığı ============ */
 "use strict";
 
-/* ---------- gerçek ekran yüksekliği ----------
-   iOS 26 hatası (26.1'de düzeltildi): tam ekran PWA'da görüntü alanı,
-   Safari arayüzü oradaymış gibi ~90pt kısa bildiriliyor. Tam ekran
-   moddayken bildirilen yükseklik ekrandan biraz kısaysa (hayalet araç
-   çubuğu payı) ekran yüksekliğini kullan; büyük farklar (klavye,
-   bölünmüş ekran) olduğu gibi bırakılır. */
-function syncAppHeight() {
-  let h = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
-  const standalone = navigator.standalone === true ||
-    (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
-  if (standalone && window.screen) {
-    const landscape = window.innerWidth > window.innerHeight;
-    const scrH = landscape
-      ? Math.min(screen.width, screen.height)
-      : Math.max(screen.width, screen.height);
-    const gap = scrH - h;
-    if (gap > 0 && gap <= 160) h = scrH;
-  }
-  document.documentElement.style.setProperty("--app-h", h + "px");
-}
-syncAppHeight();
-window.addEventListener("resize", syncAppHeight);
-window.addEventListener("orientationchange", syncAppHeight);
-if (window.visualViewport) window.visualViewport.addEventListener("resize", syncAppHeight);
-window.addEventListener("pageshow", syncAppHeight);
-
 /* ---------- storage ---------- */
 const STORE_KEY = "bulkTracker.v1";
 
@@ -176,7 +150,7 @@ document.querySelectorAll(".tab").forEach(btn => {
     document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
     document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
     $("page-" + btn.dataset.page).classList.remove("hidden");
-    $("scrollArea").scrollTo(0, 0);
+    window.scrollTo(0, 0);
   });
 });
 
