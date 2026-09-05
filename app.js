@@ -519,6 +519,34 @@ function renderCustomList() {
   $("customCount").textContent = `${state.customPrograms.length} program`;
 }
 
+/* Sistem programları: yerleşik hazır setler (A/B/C; ileride genişler) */
+const sysOpen = new Set();
+function renderSystemList() {
+  const wrap = $("systemList");
+  wrap.innerHTML = "";
+  for (const id of CYCLE) {
+    const p = PROGRAMS[id];
+    const open = sysOpen.has(id);
+    const row = document.createElement("div");
+    row.className = "custom-row";
+    row.style.flexWrap = "wrap";
+    row.innerHTML =
+      `<button type="button" class="pick-open">
+         <span class="pick-name">${escapeHtml(p.name)}
+           <span class="custom-sub">${p.ex.length} hareket · sistem</span></span>
+         <span class="exercise-chevron"${open ? ' style="transform:rotate(180deg)"' : ""}>▾</span>
+       </button>
+       ${open ? `<div class="sys-ex-list">${p.ex.map(e =>
+          `<div class="sel-row"><span>${escapeHtml(e.n)}</span><span class="pick-target">${e.t}</span></div>`).join("")}</div>` : ""}`;
+    row.querySelector(".pick-open").addEventListener("click", () => {
+      if (sysOpen.has(id)) sysOpen.delete(id); else sysOpen.add(id);
+      renderSystemList();
+    });
+    wrap.appendChild(row);
+  }
+  $("systemCount").textContent = `${CYCLE.length} program`;
+}
+
 function renderBuilder() {
   const mkChips = (containerId, dict, current, setter) => {
     const box = $(containerId);
@@ -1159,6 +1187,7 @@ function renderAll() {
   renderStuff();
   renderPlanTags();
   renderCustomList();
+  renderSystemList();
 }
 renderAll();
 checkReminders();

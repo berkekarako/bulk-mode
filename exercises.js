@@ -309,80 +309,6 @@ const EX_INFO = {
     steps: ["Plank pozisyonunda başla.", "Dizlerini sırayla göğsüne doğru hızlıca çek.", "Kalçayı yükseltmeden ritmi koru."] }
 };
 
-/* ---------- vücut haritası (ön/arka anatomik silüet) ---------- */
-function muscleSVG(primary, secondary) {
-  const cls = m => primary.includes(m) ? "mp" : (secondary.includes(m) ? "ms" : "mr");
-  const glow = () => ""; // SVG blur filtresi bazı tarayıcılarda boyamayı bozuyor — kontur CSS'te
-
-  /* ortak silüet parçaları (cx=50 merkezli) */
-  const silhouette = `
-    <circle cx="50" cy="13" r="9.5" class="sil"/>
-    <rect x="45" y="23" width="10" height="7" rx="2" class="sil"/>
-    <path d="M32 31 Q32 27 38 26 L62 26 Q68 27 68 31 L64 78 Q64 87 59 89 L41 89 Q36 87 36 78 Z" class="sil"/>
-    <ellipse cx="23" cy="49" rx="5.5" ry="12" transform="rotate(8 23 49)" class="sil"/>
-    <ellipse cx="77" cy="49" rx="5.5" ry="12" transform="rotate(-8 77 49)" class="sil"/>
-    <ellipse cx="19" cy="72" rx="4.2" ry="10" transform="rotate(12 19 72)" class="sil"/>
-    <ellipse cx="81" cy="72" rx="4.2" ry="10" transform="rotate(-12 81 72)" class="sil"/>
-    <circle cx="16.5" cy="84" r="3.2" class="sil"/>
-    <circle cx="83.5" cy="84" r="3.2" class="sil"/>
-    <ellipse cx="41" cy="107" rx="8.5" ry="21" class="sil"/>
-    <ellipse cx="59" cy="107" rx="8.5" ry="21" class="sil"/>
-    <ellipse cx="40" cy="144" rx="5.5" ry="16" class="sil"/>
-    <ellipse cx="60" cy="144" rx="5.5" ry="16" class="sil"/>
-    <ellipse cx="38.5" cy="162" rx="6.5" ry="3.2" class="sil"/>
-    <ellipse cx="61.5" cy="162" rx="6.5" ry="3.2" class="sil"/>`;
-
-  const front = `
-  <g>
-    ${silhouette}
-    <path d="M38 29 L47 25.5 L47 31 Z" class="${cls("traps")}" ${glow("traps")}/>
-    <path d="M62 29 L53 25.5 L53 31 Z" class="${cls("traps")}" ${glow("traps")}/>
-    <circle cx="30.5" cy="33.5" r="6.8" class="${cls("delts")}" ${glow("delts")}/>
-    <circle cx="69.5" cy="33.5" r="6.8" class="${cls("delts")}" ${glow("delts")}/>
-    <path d="M37 32 Q48.5 32 48.5 36 L48.5 50 Q40 52.5 37 47 Z" class="${cls("chest")}" ${glow("chest")}/>
-    <path d="M63 32 Q51.5 32 51.5 36 L51.5 50 Q60 52.5 63 47 Z" class="${cls("chest")}" ${glow("chest")}/>
-    <ellipse cx="24" cy="47" rx="4" ry="8.5" transform="rotate(8 24 47)" class="${cls("biceps")}" ${glow("biceps")}/>
-    <ellipse cx="76" cy="47" rx="4" ry="8.5" transform="rotate(-8 76 47)" class="${cls("biceps")}" ${glow("biceps")}/>
-    <ellipse cx="19.5" cy="71" rx="3.2" ry="8" transform="rotate(12 19.5 71)" class="${cls("forearms")}" ${glow("forearms")}/>
-    <ellipse cx="80.5" cy="71" rx="3.2" ry="8" transform="rotate(-12 80.5 71)" class="${cls("forearms")}" ${glow("forearms")}/>
-    <rect x="43" y="54" width="14" height="27" rx="4.5" class="${cls("abs")}" ${glow("abs")}/>
-    <path d="M50 56 V79 M44 61 H56 M44 68 H56 M44 75 H56" class="mm-cut"/>
-    <path d="M40 55 L42 55 L41.5 78 L38 75 Z" class="${cls("obliques")}" ${glow("obliques")}/>
-    <path d="M60 55 L58 55 L58.5 78 L62 75 Z" class="${cls("obliques")}" ${glow("obliques")}/>
-    <ellipse cx="41" cy="106" rx="6.8" ry="18" class="${cls("quads")}" ${glow("quads")}/>
-    <ellipse cx="59" cy="106" rx="6.8" ry="18" class="${cls("quads")}" ${glow("quads")}/>
-    <ellipse cx="47.5" cy="102" rx="2.6" ry="13" class="${cls("adductors")}" ${glow("adductors")}/>
-    <ellipse cx="52.5" cy="102" rx="2.6" ry="13" class="${cls("adductors")}" ${glow("adductors")}/>
-  </g>`;
-
-  const back = `
-  <g transform="translate(110,0)">
-    ${silhouette}
-    <path d="M38 27 L62 27 L50 47 Z" class="${cls("traps")}" ${glow("traps")}/>
-    <circle cx="30.5" cy="33.5" r="6.8" class="${cls("rearDelts")}" ${glow("rearDelts")}/>
-    <circle cx="69.5" cy="33.5" r="6.8" class="${cls("rearDelts")}" ${glow("rearDelts")}/>
-    <path d="M36 38 L46 47 L46 69 L38 62 Z" class="${cls("lats")}" ${glow("lats")}/>
-    <path d="M64 38 L54 47 L54 69 L62 62 Z" class="${cls("lats")}" ${glow("lats")}/>
-    <rect x="44.5" y="33" width="11" height="14" rx="3" class="${cls("midBack")}" ${glow("midBack")}/>
-    <path d="M45.5 62 L54.5 62 L52.5 75 L47.5 75 Z" class="${cls("lowerBack")}" ${glow("lowerBack")}/>
-    <ellipse cx="24" cy="48" rx="4" ry="8.5" transform="rotate(8 24 48)" class="${cls("triceps")}" ${glow("triceps")}/>
-    <ellipse cx="76" cy="48" rx="4" ry="8.5" transform="rotate(-8 76 48)" class="${cls("triceps")}" ${glow("triceps")}/>
-    <ellipse cx="19.5" cy="71" rx="3.2" ry="8" transform="rotate(12 19.5 71)" class="${cls("forearms")}" ${glow("forearms")}/>
-    <ellipse cx="80.5" cy="71" rx="3.2" ry="8" transform="rotate(-12 80.5 71)" class="${cls("forearms")}" ${glow("forearms")}/>
-    <ellipse cx="42" cy="87" rx="8" ry="7.5" class="${cls("glutes")}" ${glow("glutes")}/>
-    <ellipse cx="58" cy="87" rx="8" ry="7.5" class="${cls("glutes")}" ${glow("glutes")}/>
-    <ellipse cx="41" cy="112" rx="6.5" ry="16" class="${cls("hamstrings")}" ${glow("hamstrings")}/>
-    <ellipse cx="59" cy="112" rx="6.5" ry="16" class="${cls("hamstrings")}" ${glow("hamstrings")}/>
-    <ellipse cx="40" cy="142" rx="4.8" ry="11" class="${cls("calves")}" ${glow("calves")}/>
-    <ellipse cx="60" cy="142" rx="4.8" ry="11" class="${cls("calves")}" ${glow("calves")}/>
-  </g>`;
-
-  return `<svg class="muscle-map" viewBox="0 0 210 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Çalışan kaslar">
-    ${front}${back}
-    <text x="50" y="176" class="mm-label" text-anchor="middle">ÖN</text>
-    <text x="160" y="176" class="mm-label" text-anchor="middle">ARKA</text>
-  </svg>`;
-}
 
 /* ---------- iki kare motoru ---------- */
 const DUR = "2.4s";
@@ -489,8 +415,10 @@ const wrap = (inner, label) => `<svg class="ex-anim" viewBox="0 0 200 150" xmlns
   ${thin("M8 142 H192")}${inner}
   ${label ? `<text x="10" y="13" class="an-label">${label}</text>` : ""}</svg>`;
 
-/* ---------- 15 sahne ---------- */
-const ANIMS = {
+/* ---------- sahneler (parçalı: base + A pozu + B pozu) ----------
+   Her sahne {base, A, B, label} döndürür; poseSVG tek pozu durağan çizer,
+   ANIMS istenirse iki kareyi animasyonlu üretir. */
+const SCENES = {
 
   /* GÖĞÜS PRES — yan */
   chestPress: () => {
@@ -507,7 +435,7 @@ const ANIMS = {
     const B = body + thin("M126 36 L92 54") +
       arm(56, 56, 74, 56, 92, 56) + acc("M92 46 V66", 6) +
       stackLift(144, 58, true);
-    return wrap(machine + frames(A, B), "OTURMALI MAKİNE");
+    return { base: machine, A, B, label: "OTURMALI MAKİNE" };
   },
 
   /* OMUZ PRES — yan */
@@ -525,7 +453,7 @@ const ANIMS = {
     const B = body + thin("M130 28 L70 12") +
       arm(56, 54, 64, 32, 68, 14) + acc("M58 10 H80", 6) +
       stackLift(148, 58, true);
-    return wrap(machine + frames(A, B), "OTURMALI MAKİNE");
+    return { base: machine, A, B, label: "OTURMALI MAKİNE" };
   },
 
   /* PEC DECK — önden */
@@ -548,7 +476,7 @@ const ANIMS = {
       thin("M70 15 L85 32") + thin("M130 15 L115 32") +
       arm(87, 50, 84, 58, 83, 36) + arm(113, 50, 116, 58, 117, 36) +
       acc("M83 32 V60", 9) + acc("M117 32 V60", 9);
-    return wrap(machine + frames(A, B), "OTURMALI MAKİNE");
+    return { base: machine, A, B, label: "OTURMALI MAKİNE" };
   },
 
   /* LATERAL RAISE — önden */
@@ -565,7 +493,7 @@ const ANIMS = {
     const B = body +
       arm(87, 48, 67, 46, 47, 48) + arm(113, 48, 133, 46, 153, 48) +
       dbFront(42, 48) + dbFront(158, 48);
-    return wrap(frames(A, B), "DAMBIL");
+    return { base: "", A, B, label: "DAMBIL" };
   },
 
   /* TRICEPS PUSHDOWN — kablo */
@@ -585,7 +513,7 @@ const ANIMS = {
       arm(64, 52, 78, 62, 86, 88) + acc("M76 88 H96") +
       cable("M100 25 L86 85") +
       stackLift(150, 56, true);
-    return wrap(machine + frames(A, B), "KABLO İSTASYONU");
+    return { base: machine, A, B, label: "KABLO İSTASYONU" };
   },
 
   /* LAT PULLDOWN — yan */
@@ -607,7 +535,7 @@ const ANIMS = {
       arm(64, 62, 74, 62, 86, 48) +
       acc("M66 40 L108 48") + cable("M84 18 L86 46") +
       stackLift(152, 52, true);
-    return wrap(machine + frames(A, B), "KABLO • YÜKSEK MAKARA");
+    return { base: machine, A, B, label: "KABLO • YÜKSEK MAKARA" };
   },
 
   /* SEATED ROW — alçak makara */
@@ -628,7 +556,7 @@ const ANIMS = {
       arm(54, 60, 74, 72, 64, 62) + acc("M64 54 V70") +
       cable("M130 102 L65 62") +
       stackLift(154, 56, true);
-    return wrap(machine + frames(A, B), "KABLO • ALÇAK MAKARA");
+    return { base: machine, A, B, label: "KABLO • ALÇAK MAKARA" };
   },
 
   /* BICEPS CURL — yan, dambıl */
@@ -642,7 +570,7 @@ const ANIMS = {
       arrow(112, 86, 114, 58);
     const B = body +
       arm(84, 52, 88, 74, 78, 56) + dbSide(76, 52);
-    return wrap(frames(A, B), "DAMBIL");
+    return { base: "", A, B, label: "DAMBIL" };
   },
 
   /* FACE PULL — yüz hizası makara */
@@ -664,7 +592,7 @@ const ANIMS = {
       acc("M72 40 L84 32 M72 40 L84 48", 4) +
       cable("M139 46 L84 40") +
       stackLift(154, 60, true);
-    return wrap(machine + frames(A, B), "KABLO İSTASYONU");
+    return { base: machine, A, B, label: "KABLO İSTASYONU" };
   },
 
   /* SHRUG — önden */
@@ -684,7 +612,7 @@ const ANIMS = {
       legs + shortsF(100, 82) + torsoF(100, 41, 82) + trap(38) + headP(100, 20) +
       arm(87, 43, 83, 63, 83, 84) + arm(113, 43, 117, 63, 117, 84) +
       dbFront(81, 92) + dbFront(119, 92);
-    return wrap(frames(A, B), "DAMBIL");
+    return { base: "", A, B, label: "DAMBIL" };
   },
 
   /* LEG PRESS — 45° kızak */
@@ -708,7 +636,7 @@ const ANIMS = {
       `<circle class="fx" cx="120" cy="64" r="3.6"/>` +
       acc("M104 52 L128 72", 7) +
       `<circle class="an-iron" cx="122" cy="46" r="7"/><circle class="an-iron" cx="132" cy="56" r="7"/>`;
-    return wrap(machine + frames(A, B), "45° KIZAK MAKİNESİ");
+    return { base: machine, A, B, label: "45° KIZAK MAKİNESİ" };
   },
 
   /* LEG EXTENSION */
@@ -731,7 +659,7 @@ const ANIMS = {
       thin("M100 96 L130 88") +
       `<circle class="an-iron" cx="138" cy="78" r="5.5"/>` +
       stackLift(18, 62, true);
-    return wrap(machine + frames(A, B), "OTURMALI MAKİNE");
+    return { base: machine, A, B, label: "OTURMALI MAKİNE" };
   },
 
   /* LEG CURL — ayna görünüm */
@@ -755,7 +683,7 @@ const ANIMS = {
       thin("M100 96 L98 116") +
       `<circle class="an-iron" cx="94" cy="126" r="5.5"/>` +
       stackLift(158, 62, true);
-    return wrap(machine + frames(A, B), "OTURMALI MAKİNE");
+    return { base: machine, A, B, label: "OTURMALI MAKİNE" };
   },
 
   /* CALF RAISE */
@@ -777,24 +705,23 @@ const ANIMS = {
       thin("M134 32 L94 36") +
       seg(69, 112, 88, 121, 5, 4) + seg(76, 112, 95, 121, 5, 4, "fx2") +
       stackLift(148, 56, true);
-    return wrap(machine + frames(A, B), "MAKİNE • AYAKTA");
+    return { base: machine, A, B, label: "MAKİNE • AYAKTA" };
   },
 
-  /* PLANK */
-  plank: () => wrap(
-    `<rect class="an-pad" x="28" y="124" width="144" height="6" rx="3"/>` +
-    seg(54, 98, 124, 104, 14, 12) +
-    headP(44, 90) +
-    shortsS(96, 96, 18, 12) +
-    seg(54, 98, 48, 120, 7.5, 6) + seg(48, 120, 70, 122, 6, 5) +
-    leg(124, 104, 148, 112, 160, 116) + footS(160, 112, 1) +
-    `<g>
-       <circle class="an-musglow" cx="86" cy="100" r="10"/>
-       <circle cx="86" cy="100" r="6" class="an-mus"/>
-       <animate attributeName="opacity" values="0.25;1;0.25" dur="${DUR}" repeatCount="indefinite"/>
-     </g>`,
-    "VÜCUT AĞIRLIĞI • MAT"
-  ),
+  /* PLANK — tek poz */
+  plank: () => ({
+    base:
+      `<rect class="an-pad" x="28" y="124" width="144" height="6" rx="3"/>` +
+      seg(54, 98, 124, 104, 14, 12) +
+      headP(44, 90) +
+      shortsS(96, 96, 18, 12) +
+      seg(54, 98, 48, 120, 7.5, 6) + seg(48, 120, 70, 122, 6, 5) +
+      leg(124, 104, 148, 112, 160, 116) + footS(160, 112, 1) +
+      `<circle class="an-musglow" cx="86" cy="100" r="10"/>
+       <circle cx="86" cy="100" r="6" class="an-mus"/>`,
+    A: "", B: "",
+    label: "VÜCUT AĞIRLIĞI • MAT"
+  }),
 
   /* BENCH PRESS — sırtüstü, yan */
   benchPress: () => {
@@ -815,7 +742,7 @@ const ANIMS = {
     const B = body +
       arm(64, 92, 68, 68, 66, 44) +
       acc("M52 42 H84", 5) + dbSide(66, 38);
-    return wrap(bench + frames(A, B), "BENCH • BARBELL");
+    return { base: bench, A, B, label: "BENCH • BARBELL" };
   },
 
   /* SQUAT — yan */
@@ -832,7 +759,7 @@ const ANIMS = {
       shortsS(64, 98, 16, 12) + seg(84, 70, 72, 106, 15, 13) +
       `<circle class="fx" cx="89" cy="78" r="5"/>` + headP(88, 52) +
       arm(84, 72, 94, 76, 82, 68) + mus(84, 116) + barB;
-    return wrap(frames(A, B), "BARBELL • SQUAT");
+    return { base: "", A, B, label: "BARBELL • SQUAT" };
   },
 
   /* DEADLIFT — yan */
@@ -850,7 +777,7 @@ const ANIMS = {
       arm(76, 54, 80, 76, 82, 96) +
       acc("M68 100 H96", 5) + `<circle class="an-iron" cx="82" cy="104" r="9"/>` +
       mus(72, 84);
-    return wrap(frames(A, B), "BARBELL");
+    return { base: "", A, B, label: "BARBELL" };
   },
 
   /* PULL-UP — önden, bar */
@@ -866,7 +793,7 @@ const ANIMS = {
       arrow(150, 70, 150, 42);
     const B = fig(-16) +
       arm(87, 44, 76, 34, 84, 22) + arm(113, 44, 124, 34, 116, 22);
-    return wrap(rig + frames(A, B), "BAR • VÜCUT AĞIRLIĞI");
+    return { base: rig, A, B, label: "BAR • VÜCUT AĞIRLIĞI" };
   },
 
   /* PUSH-UP — yan */
@@ -884,7 +811,7 @@ const ANIMS = {
       leg(124, 110, 148, 116, 162, 120) + footS(162, 116, 1) +
       arm(58, 110, 44, 118, 54, 128) +
       mus(70, 106);
-    return wrap(mat + frames(A, B), "VÜCUT AĞIRLIĞI");
+    return { base: mat, A, B, label: "VÜCUT AĞIRLIĞI" };
   },
 
   /* CRUNCH — sırtüstü, dizler bükülü */
@@ -903,7 +830,7 @@ const ANIMS = {
       `<circle class="fx" cx="62" cy="92" r="8"/>` +
       arm(72, 100, 84, 94, 94, 96) +
       mus(88, 108);
-    return wrap(mat + frames(A, B), "MAT • VÜCUT AĞIRLIĞI");
+    return { base: mat, A, B, label: "MAT • VÜCUT AĞIRLIĞI" };
   },
 
   /* HIP THRUST — sırt bench'te, kalça köprüsü */
@@ -924,30 +851,51 @@ const ANIMS = {
       leg(100, 92, 118, 108, 120, 134) + footS(120, 135, 1) +
       acc("M84 80 H116", 5) + `<circle class="an-iron" cx="100" cy="80" r="8"/>` +
       mus(100, 98);
-    return wrap(frames(A, B), "BENCH • BARBELL");
+    return { base: "", A, B, label: "BENCH • BARBELL" };
   }
 };
 
-/* Hareket detay bloğu (kart içine gömülür) */
+/* Tek pozu durağan çiz (adım görselleri): which = "A" | "B" */
+function poseSVG(key, which) {
+  const s = SCENES[key]();
+  const pose = s.B ? (which === "B" ? s.B : s.A) : s.A;
+  return wrap(s.base + pose, "");
+}
+function sceneLabel(key) { return SCENES[key]().label; }
+
+/* Eski animasyonlu API — doğrulama ve olası geri dönüş için korunur */
+const ANIMS = {};
+for (const k of Object.keys(SCENES)) {
+  ANIMS[k] = () => {
+    const s = SCENES[k]();
+    return wrap(s.base + (s.B ? frames(s.A, s.B) : s.A), s.label);
+  };
+}
+
+/* Hareket detay bloğu (kart içine gömülür)
+   Kas figürü yok; kaslar renkli etiketlerle, her adımın yanında o
+   adımdaki duruşun durağan çizimi (1: başlangıç, ara: efor, son: dönüş). */
 function exerciseDetailHTML(exName) {
   const info = EX_INFO[exName];
   if (!info) return "";
   const chips =
     info.p.map(m => `<span class="mchip mchip-p">${MUSCLE_TR[m]}</span>`).join("") +
     info.s.map(m => `<span class="mchip mchip-s">${MUSCLE_TR[m]}</span>`).join("");
-  const steps = (info.steps || [])
-    .map(s => `<li>${s}</li>`).join("");
+  const all = info.steps || [];
+  const poseFor = i => (i === 0 || i === all.length - 1) ? "A" : "B";
+  const steps = all.map((s, i) =>
+    `<li class="step-row">
+       <div class="step-fig">${poseSVG(info.anim, poseFor(i))}</div>
+       <div class="step-txt"><span class="step-num">${i + 1}</span>${s}</div>
+     </li>`).join("");
   const link = "https://www.google.com/search?q=" +
     encodeURIComponent("vectorfitexercises " + exName + " exercise animation");
   return `
     <div class="ex-detail">
-      <div class="ex-anim-wrap">${ANIMS[info.anim]()}</div>
-      ${muscleSVG(info.p, info.s)}
-      <div class="mlegend">
-        <span class="dot dot-p"></span>Ana kas
-        <span class="dot dot-s"></span>Yardımcı kas
+      <div class="ex-muscles">
+        <span class="mhead">Kaslar</span>${chips}
+        <span class="ex-equip">${sceneLabel(info.anim)}</span>
       </div>
-      <div class="mchips">${chips}</div>
       ${steps ? `<ol class="ex-steps">${steps}</ol>` : ""}
       <a class="ex-link" href="${link}" target="_blank" rel="noopener">🎬 Hareketin animasyonuna bak ↗</a>
     </div>`;

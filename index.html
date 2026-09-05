@@ -17,7 +17,7 @@
 <body>
 
   <header class="app-header">
-    <div class="eyebrow">GÜNLÜK TAKİP <span class="app-version">v22</span></div>
+    <div class="eyebrow">GÜNLÜK TAKİP <span class="app-version">v23</span></div>
     <h1 class="app-title">BULK MODE <span class="page-name" id="pageName"></span></h1>
     <div class="app-date" id="headerDate"></div>
   </header>
@@ -134,17 +134,20 @@
           <span class="block-tag plan-tag hidden" id="workoutPlanTag"></span>
         </div>
         <div class="cycle-strip" id="cycleStrip"></div>
-        <p class="note-line">Farklı bir program yapmak istersen yukarıdan A / B / C seç.</p>
+        <p class="note-line">Farklı bir program için şeritten seç; yeni program kurmak için Program sekmesine geç.</p>
       </div>
 
       <div id="exerciseList"></div>
 
       <button class="big-btn" id="finishWorkout">ANTRENMANI BİTİR ✓</button>
       <p class="note-line center" id="finishHint"></p>
+    </section>
 
+    <!-- ============ PROGRAMLAR ============ -->
+    <section class="page hidden" id="page-programs">
       <div class="block">
         <div class="block-head">
-          <h2 class="block-title">Kendi Programların</h2>
+          <h2 class="block-title">Programlarım</h2>
           <span class="block-tag" id="customCount"></span>
         </div>
         <div id="customList"></div>
@@ -171,6 +174,16 @@
         <div class="filter-label">Hareketler <span class="setting-sub" id="pickCount"></span></div>
         <div id="exercisePick"></div>
         <button class="big-btn" id="saveProgram">PROGRAMI KAYDET ✓</button>
+      </div>
+
+      <div class="block">
+        <div class="block-head">
+          <h2 class="block-title">Sistem Programları</h2>
+          <span class="block-tag" id="systemCount"></span>
+        </div>
+        <div id="systemList"></div>
+        <p class="note-line">Hazır programlar — Antrenman sayfasındaki şeritten seçilir.
+          Satıra dokununca hareket listesi açılır; ileride yeni sistem programları eklenecek.</p>
       </div>
     </section>
 
@@ -286,6 +299,9 @@
     </button>
     <button class="tab" data-page="workout">
       <span class="tab-icon">🏋️</span><span class="tab-label">Antrenman</span>
+    </button>
+    <button class="tab" data-page="programs">
+      <span class="tab-icon">📋</span><span class="tab-label">Program</span>
     </button>
     <button class="tab" data-page="calendar">
       <span class="tab-icon">📅</span><span class="tab-label">Takvim</span>
