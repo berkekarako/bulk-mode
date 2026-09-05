@@ -11,7 +11,7 @@ Arayüz dili Türkçe. Veri cihazda `localStorage`'da durur, sunucu/hesap yok.
 - `sw.js` — service worker; HTML network-first, diğerleri cache-first
 
 ## ZORUNLU: Her değişiklikte
-1. `sw.js` içindeki `CACHE` sürümünü artır (`bulk-tracker-v6` → `v7` ...). Yoksa telefonda eski sürüm görünmeye devam eder.
+1. `sw.js` içindeki `CACHE` sürümünü artır (`bulk-tracker-v6` → `v7` ...) VE `index.html` başlığındaki `.app-version` etiketini aynı numaraya güncelle (`v12` → `v13` ...). Yoksa telefonda eski sürüm görünmeye devam eder / hangi sürümün açık olduğu anlaşılmaz.
 2. Yeni dosya eklersen `sw.js` ASSETS listesine ve gerekirse `index.html`'e ekle.
 
 ## Veri şeması (localStorage anahtarı: `bulkTracker.v1`)
