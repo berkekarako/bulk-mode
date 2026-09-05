@@ -17,7 +17,7 @@
 <body>
 
   <header class="app-header">
-    <div class="eyebrow">GÜNLÜK TAKİP <span class="app-version">v19</span></div>
+    <div class="eyebrow">GÜNLÜK TAKİP <span class="app-version">v20</span></div>
     <h1 class="app-title">BULK MODE <span class="page-name" id="pageName"></span></h1>
     <div class="app-date" id="headerDate"></div>
   </header>
@@ -43,23 +43,27 @@
         <div class="block">
           <div class="block-head">
             <h2 class="block-title">Sabah</h2>
+            <span class="block-tag plan-tag hidden" data-meal-plan>📅 Planlandı</span>
           </div>
           <div class="check-list" id="breakfastList"></div>
         </div>
 
         <div class="block">
-          <div class="block-head"><h2 class="block-title">Öğle</h2></div>
+          <div class="block-head"><h2 class="block-title">Öğle</h2>
+            <span class="block-tag plan-tag hidden" data-meal-plan>📅 Planlandı</span></div>
           <div class="check-list" id="lunchList"></div>
         </div>
 
         <div class="block">
-          <div class="block-head"><h2 class="block-title">Akşam</h2></div>
+          <div class="block-head"><h2 class="block-title">Akşam</h2>
+            <span class="block-tag plan-tag hidden" data-meal-plan>📅 Planlandı</span></div>
           <div class="check-list" id="dinnerList"></div>
         </div>
 
         <div class="block">
           <div class="block-head">
             <h2 class="block-title">Su</h2>
+            <span class="block-tag plan-tag hidden" id="waterPlanTag"></span>
             <span class="block-tag" id="waterTag"></span>
           </div>
           <div class="bottle-bar" id="bottleBar"></div>
@@ -127,8 +131,10 @@
             <div class="program-name" id="programName"></div>
             <div class="program-sub">Sıradaki antrenman</div>
           </div>
+          <span class="block-tag plan-tag hidden" id="workoutPlanTag"></span>
         </div>
         <div class="cycle-strip" id="cycleStrip"></div>
+        <p class="note-line">Farklı bir program yapmak istersen yukarıdan A / B / C seç.</p>
       </div>
 
       <div id="exerciseList"></div>
@@ -137,11 +143,11 @@
       <p class="note-line center" id="finishHint"></p>
     </section>
 
-    <!-- ============ RAPOR ============ -->
-    <section class="page hidden" id="page-habit">
+    <!-- ============ TAKVİM ============ -->
+    <section class="page hidden" id="page-calendar">
       <div class="block">
         <div class="block-head">
-          <h2 class="block-title">Takvim</h2>
+          <h2 class="block-title">Haftalık Plan</h2>
           <div class="cal-nav">
             <button class="cal-nav-btn" id="calPrev" aria-label="Önceki hafta">‹</button>
             <span class="cal-range" id="weekRange"></span>
@@ -151,8 +157,9 @@
         <button class="ghost-btn slim hidden" id="calToday">Bu haftaya dön</button>
 
         <div class="plan-source">
-          <span class="plan-source-label">Programı güne sürükle:</span>
+          <span class="plan-source-label">Sürükleyip bir güne bırak:</span>
           <div class="plan-chips" id="planChips"></div>
+          <div class="plan-chips" id="planChipsExtra"></div>
         </div>
 
         <div id="calRows"></div>
@@ -168,7 +175,10 @@
           </div>
         </div>
       </div>
+    </section>
 
+    <!-- ============ RAPOR ============ -->
+    <section class="page hidden" id="page-habit">
       <div class="block streak-block">
         <div class="streak-flame">🔥</div>
         <div>
@@ -245,6 +255,9 @@
     </button>
     <button class="tab" data-page="workout">
       <span class="tab-icon">🏋️</span><span class="tab-label">Antrenman</span>
+    </button>
+    <button class="tab" data-page="calendar">
+      <span class="tab-icon">📅</span><span class="tab-label">Takvim</span>
     </button>
     <button class="tab" data-page="habit">
       <span class="tab-icon">📊</span><span class="tab-label">Rapor</span>

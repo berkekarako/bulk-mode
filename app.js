@@ -13,7 +13,7 @@ const defaultState = () => ({
     sessions: []          // [{d, program}]
   },
   gymDays: {},            // { "2026-09-05": true }
-  plan: {},               // { "2026-09-07": "A" } — takvimde planlanan program
+  plan: {},               // { "2026-09-07": { program: "A", meals: true, water: 3 } }
   market: [],             // [{id, text, done}]
   stuff: [],              // eşya listesi — [{id, text, done}]
   settings: {
@@ -35,6 +35,10 @@ function load() {
       merged.settings = Object.assign(defaultState().settings, parsed.settings || {});
       merged.reminders = parsed.reminders || {};
       merged.plan = parsed.plan || {};
+      // eski şema: plan değeri "A" gibi metin — nesneye taşı
+      for (const k of Object.keys(merged.plan)) {
+        if (typeof merged.plan[k] === "string") merged.plan[k] = { program: merged.plan[k] };
+      }
       return merged;
     }
   } catch (e) { /* bozuk veri -> sıfırla */ }
@@ -204,7 +208,7 @@ function renderChecks() {
         const dd = dayData(todayKey());
         dd.checks[item.id] = !dd.checks[item.id];
         save();
-        renderChecks();
+        renderChecks(); renderCalendar(); renderReport();
       });
       wrap.appendChild(btn);
     }
@@ -357,26 +361,36 @@ $("weightSave").addEventListener("click", () => {
 
 /* ---------- antrenman ---------- */
 const openDetails = new Set();
+let selectedLetter = null; // A/B/C şeridinden elle seçilen program
 
 /* bugüne takvimden plan atandıysa rotasyonun önüne geçer */
 function currentLetter() {
   const tk = todayKey();
-  if (state.plan[tk] && !state.gymDays[tk]) return state.plan[tk];
+  const planned = state.plan[tk] && state.plan[tk].program;
+  if (planned && !state.gymDays[tk]) return planned;
   return state.workout.next;
+}
+function activeLetter() {
+  return selectedLetter || currentLetter();
 }
 
 function renderWorkout() {
-  const letter = currentLetter();
-  const planned = state.plan[todayKey()] === letter && letter !== state.workout.next;
+  const letter = activeLetter();
+  const todayPlan = state.plan[todayKey()] || {};
   const prog = PROGRAMS[letter];
   $("programLetter").textContent = letter;
   $("programName").textContent = prog.name;
   document.querySelector(".program-sub").textContent =
-    planned ? "Bugün planlanan (takvim)" : "Sıradaki antrenman";
+    todayPlan.program === letter ? "Bugün planlanan (takvim)"
+    : letter === state.workout.next ? "Sıradaki antrenman"
+    : "Seçili antrenman";
 
-  $("cycleStrip").innerHTML = CYCLE.map(l =>
-    `<div class="cycle-step${l === letter ? " now" : ""}">${PROGRAMS[l].name}</div>`
+  const strip = $("cycleStrip");
+  strip.innerHTML = CYCLE.map(l =>
+    `<button type="button" class="cycle-step${l === letter ? " now" : ""}" data-letter="${l}">${PROGRAMS[l].name}</button>`
   ).join("");
+  strip.querySelectorAll(".cycle-step").forEach(b =>
+    b.addEventListener("click", () => { selectedLetter = b.dataset.letter; renderWorkout(); }));
 
   const list = $("exerciseList");
   list.innerHTML = "";
@@ -426,9 +440,10 @@ function renderWorkout() {
 }
 
 $("finishWorkout").addEventListener("click", () => {
-  const letter = currentLetter();
+  const letter = activeLetter();
   const tk = todayKey();
 
+  const weights = {};
   let saved = 0;
   document.querySelectorAll(".weight-input[data-ex]").forEach(inp => {
     const v = parseFloat(inp.value);
@@ -436,22 +451,25 @@ $("finishWorkout").addEventListener("click", () => {
       const name = inp.dataset.ex;
       if (!state.workout.exHistory[name]) state.workout.exHistory[name] = [];
       state.workout.exHistory[name].push({ d: tk, w: v });
+      weights[name] = v;
       saved++;
     }
   });
 
-  state.workout.sessions.push({ d: tk, program: letter });
+  state.workout.sessions.push({ d: tk, program: letter, weights });
   state.gymDays[tk] = true;
-  delete state.plan[tk]; // plan yerine getirildi
+  removePlanPart(tk, "program"); // plan yerine getirildi
   state.workout.next = CYCLE[(CYCLE.indexOf(letter) + 1) % CYCLE.length];
+  selectedLetter = null;
   save();
 
   renderWorkout();
   renderCalendar();
   renderReport();
+  renderPlanTags();
   hideBanner();
   toast(`${PROGRAMS[letter].name} tamam! 💪 Sıradaki: ${state.workout.next}` +
-        (saved ? ` · ${saved} ağırlık kaydedildi` : ""));
+        (saved ? ` · ${saved} ağırlık takvime işlendi` : ""));
 });
 
 /* ---------- hafta yardımcıları ---------- */
@@ -481,11 +499,50 @@ function calcStreak() {
 /* ---------- takvim + sürükle-bırak planlama ---------- */
 let calOffset = 0;
 
-function sessionLetterOf(key) {
+/* sürüklenebilir plan türleri: A/B/C (program) + yemek + su */
+const PLAN_EXTRAS = {
+  meals: { label: "🍽 Yemek" },
+  water: { label: `💧 Su ${WATER_GOAL} L` }
+};
+const kindLabel = kind => PROGRAMS[kind] ? PROGRAMS[kind].name : PLAN_EXTRAS[kind].label;
+
+function removePlanPart(key, kind) {
+  const p = state.plan[key];
+  if (!p) return;
+  if (kind === "program" || PROGRAMS[kind]) delete p.program;
+  else if (kind === "meals") delete p.meals;
+  else if (kind === "water") delete p.water;
+  if (!p.program && !p.meals && !p.water) delete state.plan[key];
+}
+function addPlanPart(key, kind) {
+  const p = state.plan[key] || (state.plan[key] = {});
+  if (PROGRAMS[kind]) p.program = kind;
+  else if (kind === "meals") p.meals = true;
+  else if (kind === "water") p.water = WATER_GOAL;
+}
+
+/* Bugün + Antrenman sayfalarındaki yeşil plan rozetleri */
+function renderPlanTags() {
+  const p = state.plan[todayKey()] || {};
+  document.querySelectorAll("[data-meal-plan]").forEach(el =>
+    el.classList.toggle("hidden", !p.meals));
+  const w = $("waterPlanTag");
+  w.classList.toggle("hidden", !p.water);
+  if (p.water) w.textContent = `📅 Plan: ${p.water} L`;
+  const wo = $("workoutPlanTag");
+  wo.classList.toggle("hidden", !p.program);
+  if (p.program) wo.textContent = `📅 Plan: ${p.program}`;
+}
+
+function sessionOf(key) {
   for (let i = state.workout.sessions.length - 1; i >= 0; i--) {
-    if (state.workout.sessions[i].d === key) return state.workout.sessions[i].program;
+    if (state.workout.sessions[i].d === key) return state.workout.sessions[i];
   }
   return null;
+}
+function dayMealCount(key) {
+  const dd = state.daily[key];
+  return dd ? MEAL_IDS.filter(id => dd.checks[id]).length : 0;
 }
 
 function renderCalendar() {
@@ -497,16 +554,24 @@ function renderCalendar() {
     `${fmtShort(days[0])} – ${fmtShort(days[6])}` + (calOffset === 0 ? "" : "");
   $("calToday").classList.toggle("hidden", calOffset === 0);
 
-  // program kaynak çipleri
+  // kaynak çipleri: programlar + yemek + su
   const chips = $("planChips");
   chips.innerHTML = "";
   for (const l of CYCLE) {
     const c = document.createElement("div");
     c.className = "plan-chip";
     c.textContent = PROGRAMS[l].name;
-    c.dataset.letter = l;
     attachDrag(c, l, null);
     chips.appendChild(c);
+  }
+  const extra = $("planChipsExtra");
+  extra.innerHTML = "";
+  for (const kind of Object.keys(PLAN_EXTRAS)) {
+    const c = document.createElement("div");
+    c.className = "plan-chip" + (kind === "water" ? " chip-water" : "");
+    c.textContent = PLAN_EXTRAS[kind].label;
+    attachDrag(c, kind, null);
+    extra.appendChild(c);
   }
 
   // gün satırları
@@ -515,9 +580,11 @@ function renderCalendar() {
   days.forEach((d, i) => {
     const k = keyOf(d);
     const done = !!state.gymDays[k];
-    const doneLetter = done ? sessionLetterOf(k) : null;
-    const plan = state.plan[k];
+    const sess = sessionOf(k);
+    const doneLetter = done && sess ? sess.program : null;
+    const plan = state.plan[k] || {};
     const liters = dayLiters(k);
+    const meals = dayMealCount(k);
     const weight = state.weights[k];
     const isToday = k === tk;
 
@@ -529,10 +596,24 @@ function renderCalendar() {
     row.dataset.key = k;
 
     const badges = [];
+    // yapılanlar (gerçekleşen — her zaman günün son değeri)
     if (done) badges.push(`<button type="button" class="cal-badge cb-done" data-act="undone">💪 ${doneLetter || "✓"}</button>`);
-    if (plan) badges.push(`<span class="cal-badge cb-plan" data-plan="${plan}">${plan} · ${PROGRAMS[plan].name.split("— ")[1]}</span>`);
+    if (meals > 0) badges.push(`<span class="cal-badge cb-info">🍽 ${meals}/${MEAL_IDS.length}</span>`);
     if (liters > 0) badges.push(`<span class="cal-badge cb-info">💧 ${liters.toFixed(1)}L</span>`);
     if (weight) badges.push(`<span class="cal-badge cb-info">⚖️ ${weight}</span>`);
+    // planlananlar (sürüklenebilir / dokununca kalkar)
+    if (plan.program && !done)
+      badges.push(`<span class="cal-badge cb-plan" data-kind="${plan.program}">📅 ${plan.program} · ${PROGRAMS[plan.program].name.split("— ")[1]}</span>`);
+    if (plan.meals && meals === 0)
+      badges.push(`<span class="cal-badge cb-plan" data-kind="meals">📅 🍽 yemek</span>`);
+    if (plan.water && liters === 0)
+      badges.push(`<span class="cal-badge cb-plan cb-water" data-kind="water">📅 💧 ${plan.water} L</span>`);
+
+    // tamamlanan antrenmanın ağırlıkları gün satırında
+    const wts = sess && sess.weights ? Object.entries(sess.weights) : [];
+    const detail = (done && wts.length)
+      ? `<div class="cal-detail">${wts.map(([n, w]) => `${escapeHtml(n)} <b>${w}</b>`).join(" · ")}</div>`
+      : "";
 
     row.innerHTML =
       `<div class="cal-day">
@@ -540,7 +621,8 @@ function renderCalendar() {
          <span class="cal-dnum">${d.getDate()}</span>
        </div>
        <div class="cal-badges">${badges.join("") || `<span class="cal-empty">—</span>`}</div>
-       ${done ? "" : `<button type="button" class="cal-mark" data-act="done" title="Gidilmiş işaretle">💪</button>`}`;
+       ${done ? "" : `<button type="button" class="cal-mark" data-act="done" title="Gidilmiş işaretle">💪</button>`}
+       ${detail}`;
 
     // yapıldı işaretle / geri al
     const markBtn = row.querySelector('[data-act="done"]');
@@ -554,16 +636,15 @@ function renderCalendar() {
       save(); renderCalendar(); renderReport(); renderWorkout();
     });
 
-    // planlanan rozet: sürüklenebilir (taşı) / dokun (kaldır)
-    const planBadge = row.querySelector(".cb-plan");
-    if (planBadge) attachDrag(planBadge, plan, k);
+    // plan rozetleri: sürüklenebilir (taşı) / dokun (kaldır)
+    row.querySelectorAll(".cb-plan").forEach(b => attachDrag(b, b.dataset.kind, k));
 
     rows.appendChild(row);
   });
 
   $("plannedDaysHint").innerHTML = state.settings.plannedDays.length
     ? `Sabit spor günlerin: <b>${state.settings.plannedDays.map(i => DAY_NAMES[i]).join(" · ")}</b> — plan rozetine dokunursan kaldırılır.`
-    : `Programı (A/B/C) yukarıdan tutup bir güne bırak. Plan rozetine dokunursan kaldırılır; rozetleri günler arasında da taşıyabilirsin.`;
+    : `Program (A/B/C), yemek veya suyu yukarıdan tutup bir güne bırak. Plan rozetine dokunursan kaldırılır; rozetleri günler arasında da taşıyabilirsin. Gün geldiğinde plan, Bugün ve Antrenman sayfalarında yeşil rozetle görünür.`;
 
   // ilerleme (görünen hafta)
   const count = gymCount(days);
@@ -582,15 +663,15 @@ $("calToday").addEventListener("click", () => { calOffset = 0; renderCalendar();
 /* --- pointer tabanlı sürükle-bırak (dokunmatik uyumlu) --- */
 let drag = null;
 
-function attachDrag(el, letter, fromKey) {
+function attachDrag(el, kind, fromKey) {
   el.style.touchAction = "none";
   el.addEventListener("pointerdown", e => {
     e.preventDefault();
     const ghost = document.createElement("div");
     ghost.className = "drag-ghost";
-    ghost.textContent = PROGRAMS[letter].name;
+    ghost.textContent = kindLabel(kind);
     document.body.appendChild(ghost);
-    drag = { letter, fromKey, ghost, moved: false, x0: e.clientX, y0: e.clientY };
+    drag = { kind, fromKey, ghost, moved: false, x0: e.clientX, y0: e.clientY };
     positionGhost(e.clientX, e.clientY);
   });
 }
@@ -612,28 +693,25 @@ window.addEventListener("pointermove", e => {
 });
 window.addEventListener("pointerup", e => {
   if (!drag) return;
-  const { letter, fromKey, ghost, moved } = drag;
+  const { kind, fromKey, ghost, moved } = drag;
   ghost.remove();
   document.querySelectorAll(".cal-row.drop-hover").forEach(r => r.classList.remove("drop-hover"));
   const row = moved ? rowAtPoint(e.clientX, e.clientY) : null;
 
   if (moved && row) {
     const key = row.dataset.key;
-    state.plan[key] = letter;
-    if (fromKey && fromKey !== key) delete state.plan[fromKey];
-    toast(`${PROGRAMS[letter].name} → ${formatKeyShort(key)} planlandı 📅`);
-  } else if (moved && fromKey) {
-    delete state.plan[fromKey];
-    toast("Plan kaldırıldı");
-  } else if (!moved && fromKey) {
-    delete state.plan[fromKey];
+    addPlanPart(key, kind);
+    if (fromKey && fromKey !== key) removePlanPart(fromKey, kind);
+    toast(`${kindLabel(kind)} → ${formatKeyShort(key)} planlandı 📅`);
+  } else if (fromKey) {
+    removePlanPart(fromKey, kind);
     toast("Plan kaldırıldı");
   } else if (!moved) {
-    toast("Programı tutup bir günün üzerine sürükle 👆");
+    toast("Çipi tutup bir günün üzerine sürükle 👆");
   }
   drag = null;
   save();
-  renderCalendar(); renderWorkout();
+  renderCalendar(); renderWorkout(); renderPlanTags();
 });
 window.addEventListener("pointercancel", () => {
   if (!drag) return;
@@ -813,17 +891,17 @@ function checkReminders() {
 
   // 2) spor günü: ayarlardaki sabit günler VEYA takvimde bugüne plan varsa
   const weekIdx = (now.getDay() + 6) % 7;
-  const gymToday = state.settings.plannedDays.includes(weekIdx) || !!state.plan[tk];
+  const planProg = state.plan[tk] && state.plan[tk].program;
+  const gymToday = state.settings.plannedDays.includes(weekIdx) || !!planProg;
   if (gymToday && !state.gymDays[tk] && now.getHours() >= 9 && now.getHours() < 22) {
     const last = state.reminders.lastGym || 0;
     if (Date.now() - last >= 55 * 60 * 1000) {
       state.reminders.lastGym = Date.now();
       save();
-      const p = state.plan[tk];
-      const msg = p ? `🏋️ Bugün ${PROGRAMS[p].name} planlı — antrenmana gitmeyi unutma!`
+      const msg = planProg ? `🏋️ Bugün ${PROGRAMS[planProg].name} planlı — antrenmana gitmeyi unutma!`
                     : "🏋️ Bugün spor günü — antrenmana gitmeyi unutma!";
       showBanner(msg);
-      notify("Spor günü 🏋️", p ? `Bugün ${PROGRAMS[p].name} var, unutma!` : "Bugün antrenman var, unutma!");
+      notify("Spor günü 🏋️", planProg ? `Bugün ${PROGRAMS[planProg].name} var, unutma!` : "Bugün antrenman var, unutma!");
     }
   }
 }
@@ -909,6 +987,7 @@ function renderAll() {
   renderSettings();
   renderMarket();
   renderStuff();
+  renderPlanTags();
 }
 renderAll();
 checkReminders();
