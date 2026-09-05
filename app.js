@@ -27,6 +27,7 @@ const defaultState = () => ({
   gymDays: {},            // { "2026-09-05": true }
   plan: {},               // { "2026-09-07": "A" } — takvimde planlanan program
   market: [],             // [{id, text, done}]
+  stuff: [],              // eşya listesi — [{id, text, done}]
   settings: {
     plannedDays: [],      // haftanın gün indexleri (0=Pzt)
     weightTime: "08:00"
@@ -839,44 +840,56 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-/* ---------- market ---------- */
-function renderMarket() {
-  const list = $("marketList");
-  list.innerHTML = "";
-  if (!state.market.length) {
-    list.innerHTML = `<div class="market-empty">Liste boş — yukarıdan ürün ekle.</div>`;
+/* ---------- market & eşya listeleri ---------- */
+function initShopList({ key, listId, countId, formId, inputId, clearId, emptyMsg }) {
+  function render() {
+    const list = $(listId);
+    list.innerHTML = "";
+    if (!state[key].length) {
+      list.innerHTML = `<div class="market-empty">${emptyMsg}</div>`;
+    }
+    for (const item of state[key]) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "check-item" + (item.done ? " checked" : "");
+      row.innerHTML =
+        `<span class="box">${item.done ? "✓" : ""}</span>` +
+        `<span class="txt">${escapeHtml(item.text)}</span>`;
+      row.addEventListener("click", () => {
+        item.done = !item.done;
+        save(); render();
+      });
+      list.appendChild(row);
+    }
+    const doneCount = state[key].filter(i => i.done).length;
+    $(countId).textContent = `${state[key].length - doneCount} kalan`;
+    $(clearId).classList.toggle("hidden", doneCount === 0);
   }
-  for (const item of state.market) {
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = "check-item" + (item.done ? " checked" : "");
-    row.innerHTML =
-      `<span class="box">${item.done ? "✓" : ""}</span>` +
-      `<span class="txt">${escapeHtml(item.text)}</span>`;
-    row.addEventListener("click", () => {
-      item.done = !item.done;
-      save(); renderMarket();
-    });
-    list.appendChild(row);
-  }
-  const doneCount = state.market.filter(i => i.done).length;
-  $("marketCount").textContent = `${state.market.length - doneCount} kalan`;
-  $("clearDone").classList.toggle("hidden", doneCount === 0);
+  $(formId).addEventListener("submit", e => {
+    e.preventDefault();
+    const inp = $(inputId);
+    const text = inp.value.trim();
+    if (!text) return;
+    state[key].push({ id: Date.now(), text, done: false });
+    inp.value = "";
+    save(); render();
+  });
+  $(clearId).addEventListener("click", () => {
+    state[key] = state[key].filter(i => !i.done);
+    save(); render();
+  });
+  return render;
 }
 
-$("marketForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const inp = $("marketInput");
-  const text = inp.value.trim();
-  if (!text) return;
-  state.market.push({ id: Date.now(), text, done: false });
-  inp.value = "";
-  save(); renderMarket();
+const renderMarket = initShopList({
+  key: "market", listId: "marketList", countId: "marketCount",
+  formId: "marketForm", inputId: "marketInput", clearId: "clearDone",
+  emptyMsg: "Liste boş — yukarıdan ürün ekle."
 });
-
-$("clearDone").addEventListener("click", () => {
-  state.market = state.market.filter(i => !i.done);
-  save(); renderMarket();
+const renderStuff = initShopList({
+  key: "stuff", listId: "stuffList", countId: "stuffCount",
+  formId: "stuffForm", inputId: "stuffInput", clearId: "stuffClearDone",
+  emptyMsg: "Liste boş — yukarıdan eşya ekle."
 });
 
 /* ---------- başlat ---------- */
@@ -889,6 +902,8 @@ function renderAll() {
   renderCalendar();
   renderReport();
   renderSettings();
+  renderMarket();
+  renderStuff();
 }
 renderAll();
 checkReminders();

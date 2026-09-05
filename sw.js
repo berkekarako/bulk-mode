@@ -1,5 +1,5 @@
 /* Bulk Mode — service worker */
-const CACHE = "bulk-tracker-v10";
+const CACHE = "bulk-tracker-v11";
 const ASSETS = [
   "./",
   "./index.html",
