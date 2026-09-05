@@ -149,7 +149,7 @@ document.querySelectorAll(".tab").forEach(btn => {
     document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
     document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
     $("page-" + btn.dataset.page).classList.remove("hidden");
-    window.scrollTo(0, 0);
+    $("scrollArea").scrollTo(0, 0);
   });
 });
 
