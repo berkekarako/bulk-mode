@@ -26,19 +26,19 @@
 html {
   height: 100%;
   overflow-x: hidden;
-  overscroll-behavior: none;
 }
 
 body {
-  /* +1px: sayfa hep "kaydırılabilir" kalsın — iOS 26, kaydırılamayan
-     kısa sayfalarda sabit çubuğu yukarıda gösteriyor */
-  min-height: calc(100% + 1px);
+  /* +120px: her sayfada gerçek kaydırma payı — iOS 26, kaydırılamayan
+     kısa sayfalarda (Market, Takviye, Kilo) sabit çubuğu yukarıda
+     gösteriyor; bol pay tüm sayfaları "uzun sayfa" gibi davrandırır.
+     Dikey lastik bant serbest (doğal his); yatay kayma kapalı. */
+  min-height: calc(100% + 120px);
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   padding-bottom: calc(76px + env(safe-area-inset-bottom));
   overflow-x: hidden;
-  overscroll-behavior: none;
   touch-action: pan-y; /* yalnız dikey kaydırma — yatay sürükleme ve çift dokunuş yakınlaştırması yok */
 }
 

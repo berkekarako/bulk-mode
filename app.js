@@ -160,6 +160,7 @@ document.querySelectorAll(".seg").forEach(btn => {
     document.querySelectorAll(".seg").forEach(b => b.classList.toggle("active", b === btn));
     document.querySelectorAll(".seg-page").forEach(p => p.classList.add("hidden"));
     $("seg-" + btn.dataset.seg).classList.remove("hidden");
+    window.scrollTo(0, 0);
   });
 });
 
