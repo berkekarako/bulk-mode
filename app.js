@@ -1,6 +1,18 @@
 /* ============ BULK MODE — uygulama mantığı ============ */
 "use strict";
 
+/* ---------- gerçek ekran yüksekliği ----------
+   iOS tam ekran PWA'da 100%/100dvh ekranın tamamını vermeyebiliyor
+   (altta boşluk kalıyor); yüksekliği ölçüp CSS değişkenine yazıyoruz. */
+function syncAppHeight() {
+  document.documentElement.style.setProperty("--app-h", window.innerHeight + "px");
+}
+syncAppHeight();
+window.addEventListener("resize", syncAppHeight);
+window.addEventListener("orientationchange", syncAppHeight);
+if (window.visualViewport) window.visualViewport.addEventListener("resize", syncAppHeight);
+window.addEventListener("pageshow", syncAppHeight);
+
 /* ---------- storage ---------- */
 const STORE_KEY = "bulkTracker.v1";
 
