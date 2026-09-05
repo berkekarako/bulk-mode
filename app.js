@@ -144,15 +144,31 @@ function escapeHtml(s) {
   }[c]));
 }
 
+/* sabit başlık: gövdenin üst boşluğu başlık yüksekliği kadar */
+function syncHeaderPad() {
+  document.body.style.paddingTop = (document.querySelector(".app-header").offsetHeight + 14) + "px";
+}
+window.addEventListener("resize", syncHeaderPad);
+window.addEventListener("pageshow", syncHeaderPad);
+window.addEventListener("load", syncHeaderPad);
+syncHeaderPad();
+
+/* başlıkta etkin sayfa adı */
+function setPageName(btn) {
+  $("pageName").textContent = "· " + btn.querySelector(".tab-label").textContent.toLocaleUpperCase("tr-TR");
+}
+
 /* sekmeler */
 document.querySelectorAll(".tab").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
     document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
     $("page-" + btn.dataset.page).classList.remove("hidden");
+    setPageName(btn);
     window.scrollTo(0, 0);
   });
 });
+setPageName(document.querySelector(".tab.active"));
 
 /* segmentler (Bugün sayfası) */
 document.querySelectorAll(".seg").forEach(btn => {
