@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#131110">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bulk Mode">
+  <title>Bulk Mode</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="eyebrow">GÜNLÜK TAKİP</div>
+    <h1 class="app-title">BULK MODE</h1>
+    <div class="app-date" id="headerDate"></div>
+  </header>
+
+  <div class="banner hidden" id="reminderBanner">
+    <span id="bannerText"></span>
+    <button id="bannerClose" aria-label="Kapat">✕</button>
+  </div>
+
+  <main id="main">
+
+    <!-- ============ BUGÜN ============ -->
+    <section class="page" id="page-today">
+
+      <div class="seg-bar">
+        <button class="seg active" data-seg="beslenme">Beslenme</button>
+        <button class="seg" data-seg="takviye">Takviye</button>
+        <button class="seg" data-seg="kilo">Kilo</button>
+      </div>
+
+      <!-- Beslenme -->
+      <div class="seg-page" id="seg-beslenme">
+        <div class="block">
+          <div class="block-head">
+            <h2 class="block-title">Sabah</h2>
+          </div>
+          <div class="check-list" id="breakfastList"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-head"><h2 class="block-title">Öğle</h2></div>
+          <div class="check-list" id="lunchList"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-head"><h2 class="block-title">Akşam</h2></div>
+          <div class="check-list" id="dinnerList"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-head">
+            <h2 class="block-title">Su</h2>
+            <span class="block-tag" id="waterTag"></span>
+          </div>
+          <div class="bottle-bar" id="bottleBar"></div>
+          <div class="bottle-log-wrap">
+            <div class="bottle-log" id="bottleLog"></div>
+          </div>
+          <p class="note-line" id="waterHint">İçtiğin şişeye dokun — yanlışlıkla eklediysen aşağıdaki şişeye dokunup sil.</p>
+        </div>
+      </div>
+
+      <!-- Takviye -->
+      <div class="seg-page hidden" id="seg-takviye">
+        <div class="block">
+          <div class="block-head"><h2 class="block-title">Sabah</h2></div>
+          <div class="check-list" id="suppMorning"></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h2 class="block-title">Antrenman Öncesi</h2></div>
+          <div class="check-list" id="suppPre"></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h2 class="block-title">Antrenman Sonrası</h2></div>
+          <div class="check-list" id="suppPost"></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h2 class="block-title">Gece</h2></div>
+          <div class="check-list" id="suppNight"></div>
+        </div>
+      </div>
+
+      <!-- Kilo -->
+      <div class="seg-page hidden" id="seg-kilo">
+        <div class="block">
+          <div class="block-head">
+            <h2 class="block-title">Bugünkü Kilo</h2>
+            <span class="block-tag" id="weightTodayTag"></span>
+          </div>
+          <div class="weight-entry">
+            <input type="number" inputmode="decimal" step="0.1" min="20" max="300"
+                   id="weightInput" class="weight-input wide" placeholder="örn. 74.5">
+            <span class="weight-kg">kg</span>
+            <button class="small-btn" id="weightSave">Kaydet</button>
+          </div>
+          <p class="note-line" id="weightHint"></p>
+        </div>
+
+        <div class="block">
+          <div class="block-head">
+            <h2 class="block-title">Gidişat</h2>
+            <span class="block-tag" id="weightDeltaTag"></span>
+          </div>
+          <div id="weightChart" class="weight-chart"></div>
+          <div id="weightRecent" class="weight-recent"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============ ANTRENMAN ============ -->
+    <section class="page hidden" id="page-workout">
+      <div class="block">
+        <div class="program-banner">
+          <div class="program-letter" id="programLetter">A</div>
+          <div>
+            <div class="program-name" id="programName"></div>
+            <div class="program-sub">Sıradaki antrenman</div>
+          </div>
+        </div>
+        <div class="cycle-strip" id="cycleStrip"></div>
+      </div>
+
+      <div id="exerciseList"></div>
+
+      <button class="big-btn" id="finishWorkout">ANTRENMANI BİTİR ✓</button>
+      <p class="note-line center" id="finishHint"></p>
+    </section>
+
+    <!-- ============ RAPOR ============ -->
+    <section class="page hidden" id="page-habit">
+      <div class="block">
+        <div class="block-head">
+          <h2 class="block-title">Takvim</h2>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" id="calPrev" aria-label="Önceki hafta">‹</button>
+            <span class="cal-range" id="weekRange"></span>
+            <button class="cal-nav-btn" id="calNext" aria-label="Sonraki hafta">›</button>
+          </div>
+        </div>
+        <button class="ghost-btn slim hidden" id="calToday">Bu haftaya dön</button>
+
+        <div class="plan-source">
+          <span class="plan-source-label">Programı güne sürükle:</span>
+          <div class="plan-chips" id="planChips"></div>
+        </div>
+
+        <div id="calRows"></div>
+        <p class="note-line" id="plannedDaysHint"></p>
+
+        <div class="progress-wrap">
+          <div class="progress-labels">
+            <span id="weekCountLabel">0 / 3 antrenman</span>
+            <span id="weekStatusLabel"></span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="weekProgressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block streak-block">
+        <div class="streak-flame">🔥</div>
+        <div>
+          <div class="streak-num" id="streakNum">0</div>
+          <div class="streak-label">hafta üst üste hedef tutturuldu</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-head">
+          <h2 class="block-title">Haftalık Rapor</h2>
+        </div>
+        <div id="reportBody" class="report-body"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-head">
+          <h2 class="block-title">Ayarlar</h2>
+        </div>
+
+        <div class="setting-label">Spor günlerim <span class="setting-sub">(hatırlatma + takvimde vurgu — şimdilik boş bırakabilirsin)</span></div>
+        <div class="day-chips" id="dayChips"></div>
+
+        <div class="setting-label">Kilo hatırlatma saati</div>
+        <div class="setting-row">
+          <input type="time" id="weightTimeInput" class="time-input">
+        </div>
+
+        <div class="setting-label">Bildirimler</div>
+        <div class="setting-row">
+          <button class="small-btn" id="notifBtn">Bildirim izni ver</button>
+          <span class="setting-status" id="notifStatus"></span>
+        </div>
+        <p class="note-line">iPhone'da bildirimlerin çalışması için uygulamanın ana ekrana
+          eklenmiş olması gerekir; uygulama tamamen kapalıyken bildirim gelmez
+          (sunucusuz PWA sınırı) — uygulama açıkken ve açıldığı anda kontrol edilir.</p>
+      </div>
+    </section>
+
+    <!-- ============ MARKET ============ -->
+    <section class="page hidden" id="page-market">
+      <div class="block">
+        <div class="block-head">
+          <h2 class="block-title">Market Listesi</h2>
+          <span class="block-tag" id="marketCount"></span>
+        </div>
+        <form class="market-form" id="marketForm">
+          <input type="text" id="marketInput" placeholder="Ürün ekle… (örn. yumurta)" autocomplete="off" enterkeyhint="done">
+          <button type="submit" class="market-add" aria-label="Ekle">+</button>
+        </form>
+        <div class="market-list" id="marketList"></div>
+        <button class="ghost-btn hidden" id="clearDone">✓ Alınanları temizle</button>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tab-bar">
+    <button class="tab active" data-page="today">
+      <span class="tab-icon">🍳</span><span class="tab-label">Bugün</span>
+    </button>
+    <button class="tab" data-page="workout">
+      <span class="tab-icon">🏋️</span><span class="tab-label">Antrenman</span>
+    </button>
+    <button class="tab" data-page="habit">
+      <span class="tab-icon">📊</span><span class="tab-label">Rapor</span>
+    </button>
+    <button class="tab" data-page="market">
+      <span class="tab-icon">🛒</span><span class="tab-label">Market</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="exercises.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
