@@ -6,7 +6,7 @@ Arayüz dili Türkçe. Veri cihazda `localStorage`'da durur, sunucu/hesap yok.
 ## Dosyalar
 - `index.html` — tek sayfa; 5 alt sekme: Bugün (Beslenme/Takviye/Kilo), Antrenman, Takvim (sürükle-bırak plan: program/yemek/su), Rapor, Market
 - `app.js` — tüm uygulama mantığı (state, takvim + sürükle-bırak plan, hatırlatmalar)
-- `exercises.js` — hareket kütüphanesi (EX_INFO: ~44 hareket; grup/ekipman/hedef) + animasyonlar (SVG) + kas haritası
+- `exercises.js` — hareket kütüphanesi (EX_INFO: ~100 hareket; grup/ekipman/hedef/adımlar) + animasyonlar (SVG) + kas haritası
 - `styles.css` — tema: koyu sıcak zemin, amber vurgu (#f0a63a), kırmızı ana kas (#e04f36)
 - `sw.js` — service worker; HTML network-first, diğerleri cache-first
 
