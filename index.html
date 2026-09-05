@@ -17,7 +17,7 @@
 <body>
 
   <header class="app-header">
-    <div class="eyebrow">GÜNLÜK TAKİP <span class="app-version">v20</span></div>
+    <div class="eyebrow">GÜNLÜK TAKİP <span class="app-version">v21</span></div>
     <h1 class="app-title">BULK MODE <span class="page-name" id="pageName"></span></h1>
     <div class="app-date" id="headerDate"></div>
   </header>
@@ -141,6 +141,37 @@
 
       <button class="big-btn" id="finishWorkout">ANTRENMANI BİTİR ✓</button>
       <p class="note-line center" id="finishHint"></p>
+
+      <div class="block">
+        <div class="block-head">
+          <h2 class="block-title">Kendi Programların</h2>
+          <span class="block-tag" id="customCount"></span>
+        </div>
+        <div id="customList"></div>
+        <button class="ghost-btn" id="openBuilder">➕ Yeni Program Oluştur</button>
+      </div>
+
+      <div class="block hidden" id="builderBlock">
+        <div class="block-head">
+          <h2 class="block-title">Program Oluştur</h2>
+          <button class="builder-close" id="closeBuilder" aria-label="Kapat">✕</button>
+        </div>
+        <input type="text" id="builderName" class="builder-input" maxlength="28"
+               placeholder="Program adı… (örn. D — Full Body)" autocomplete="off">
+        <div class="filter-label">Kas grubu</div>
+        <div class="filter-chips" id="groupChips"></div>
+        <div class="filter-label">Ekipman</div>
+        <div class="filter-chips" id="equipChips"></div>
+        <input type="search" id="builderSearch" class="builder-input"
+               placeholder="Hareket ara…" autocomplete="off">
+        <div id="builderSelectedWrap" class="hidden">
+          <div class="filter-label">Programa eklenenler</div>
+          <div id="builderSelected"></div>
+        </div>
+        <div class="filter-label">Hareketler <span class="setting-sub" id="pickCount"></span></div>
+        <div id="exercisePick"></div>
+        <button class="big-btn" id="saveProgram">PROGRAMI KAYDET ✓</button>
+      </div>
     </section>
 
     <!-- ============ TAKVİM ============ -->

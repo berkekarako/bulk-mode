@@ -14,23 +14,75 @@ const MUSCLE_TR = {
   glutes: "Kalça", quads: "Ön bacak", hamstrings: "Arka bacak", calves: "Baldır"
 };
 
-/* Hareket -> kaslar + animasyon */
+/* Filtre sözlükleri */
+const EX_GROUPS = {
+  chest: "Göğüs", back: "Sırt", shoulders: "Omuz",
+  arms: "Kol", legs: "Bacak", core: "Karın"
+};
+const EQUIP_TR = {
+  machine: "Makine", cable: "Kablo", dumbbell: "Dambıl",
+  barbell: "Barbell", body: "Vücut Ağırlığı"
+};
+
+/* Hareket kütüphanesi: kaslar + animasyon + grup + ekipman + hedef */
 const EX_INFO = {
-  "Machine Chest Press":      { p: ["chest"], s: ["delts", "triceps"], anim: "chestPress" },
-  "Shoulder Press Machine":   { p: ["delts"], s: ["triceps", "traps"], anim: "shoulderPress" },
-  "Pec Deck":                 { p: ["chest"], s: ["delts"], anim: "pecDeck" },
-  "Dambıl Lateral Raise":     { p: ["delts"], s: ["traps"], anim: "latRaise" },
-  "Triceps Pushdown (Cable)": { p: ["triceps"], s: ["forearms"], anim: "pushdown" },
-  "Lat Pulldown":             { p: ["lats"], s: ["biceps", "midBack", "rearDelts"], anim: "pulldown" },
-  "Seated Row Machine":       { p: ["midBack", "lats"], s: ["biceps", "rearDelts"], anim: "row" },
-  "Dambıl Biceps Curl":       { p: ["biceps"], s: ["forearms"], anim: "curl" },
-  "Face Pull (Cable)":        { p: ["rearDelts"], s: ["traps", "midBack"], anim: "facePull" },
-  "Dambıl Shrug":             { p: ["traps"], s: ["forearms"], anim: "shrug" },
-  "Leg Press":                { p: ["quads", "glutes"], s: ["hamstrings", "calves"], anim: "legPress" },
-  "Leg Extension":            { p: ["quads"], s: [], anim: "legExt" },
-  "Leg Curl":                 { p: ["hamstrings"], s: ["calves"], anim: "legCurl" },
-  "Calf Raise Machine":       { p: ["calves"], s: [], anim: "calfRaise" },
-  "Plank":                    { p: ["abs"], s: ["obliques", "lowerBack"], anim: "plank" }
+  /* ---- GÖĞÜS ---- */
+  "Machine Chest Press":      { g: "chest", eq: "machine", t: "3 × 10", p: ["chest"], s: ["delts", "triceps"], anim: "chestPress" },
+  "Pec Deck":                 { g: "chest", eq: "machine", t: "3 × 12", p: ["chest"], s: ["delts"], anim: "pecDeck" },
+  "Bench Press (Barbell)":    { g: "chest", eq: "barbell", t: "3 × 8",  p: ["chest"], s: ["delts", "triceps"], anim: "benchPress" },
+  "Incline Dambıl Press":     { g: "chest", eq: "dumbbell", t: "3 × 10", p: ["chest"], s: ["delts", "triceps"], anim: "benchPress" },
+  "Cable Fly":                { g: "chest", eq: "cable", t: "3 × 12", p: ["chest"], s: ["delts"], anim: "pecDeck" },
+  "Push-Up":                  { g: "chest", eq: "body", t: "3 × 15", p: ["chest"], s: ["triceps", "delts", "abs"], anim: "pushup", bodyweight: true },
+  "Dips":                     { g: "chest", eq: "body", t: "3 × 10", p: ["chest"], s: ["triceps", "delts"], anim: "pushup", bodyweight: true },
+
+  /* ---- SIRT ---- */
+  "Lat Pulldown":             { g: "back", eq: "cable", t: "3 × 10", p: ["lats"], s: ["biceps", "midBack", "rearDelts"], anim: "pulldown" },
+  "Seated Row Machine":       { g: "back", eq: "machine", t: "3 × 10", p: ["midBack", "lats"], s: ["biceps", "rearDelts"], anim: "row" },
+  "Barbell Row":              { g: "back", eq: "barbell", t: "3 × 8",  p: ["midBack", "lats"], s: ["biceps", "rearDelts", "lowerBack"], anim: "row" },
+  "Pull-Up":                  { g: "back", eq: "body", t: "3 × 8",  p: ["lats"], s: ["biceps", "midBack"], anim: "pullup", bodyweight: true },
+  "T-Bar Row":                { g: "back", eq: "barbell", t: "3 × 10", p: ["midBack", "lats"], s: ["biceps", "rearDelts"], anim: "row" },
+  "Straight-Arm Pulldown":    { g: "back", eq: "cable", t: "3 × 12", p: ["lats"], s: ["triceps", "abs"], anim: "pulldown" },
+  "Deadlift":                 { g: "back", eq: "barbell", t: "3 × 5",  p: ["lowerBack", "glutes", "hamstrings"], s: ["traps", "forearms", "quads"], anim: "deadlift" },
+
+  /* ---- OMUZ ---- */
+  "Shoulder Press Machine":   { g: "shoulders", eq: "machine", t: "3 × 10", p: ["delts"], s: ["triceps", "traps"], anim: "shoulderPress" },
+  "Dambıl Shoulder Press":    { g: "shoulders", eq: "dumbbell", t: "3 × 10", p: ["delts"], s: ["triceps", "traps"], anim: "shoulderPress" },
+  "Dambıl Lateral Raise":     { g: "shoulders", eq: "dumbbell", t: "3 × 15", p: ["delts"], s: ["traps"], anim: "latRaise" },
+  "Dambıl Front Raise":       { g: "shoulders", eq: "dumbbell", t: "3 × 12", p: ["delts"], s: ["traps"], anim: "latRaise" },
+  "Face Pull (Cable)":        { g: "shoulders", eq: "cable", t: "3 × 15", p: ["rearDelts"], s: ["traps", "midBack"], anim: "facePull" },
+  "Reverse Pec Deck":         { g: "shoulders", eq: "machine", t: "3 × 12", p: ["rearDelts"], s: ["midBack", "traps"], anim: "pecDeck" },
+  "Dambıl Shrug":             { g: "shoulders", eq: "dumbbell", t: "3 × 12", p: ["traps"], s: ["forearms"], anim: "shrug" },
+
+  /* ---- KOL ---- */
+  "Dambıl Biceps Curl":       { g: "arms", eq: "dumbbell", t: "3 × 12", p: ["biceps"], s: ["forearms"], anim: "curl" },
+  "Hammer Curl":              { g: "arms", eq: "dumbbell", t: "3 × 12", p: ["biceps"], s: ["forearms"], anim: "curl" },
+  "Barbell Curl":             { g: "arms", eq: "barbell", t: "3 × 10", p: ["biceps"], s: ["forearms"], anim: "curl" },
+  "Cable Curl":               { g: "arms", eq: "cable", t: "3 × 12", p: ["biceps"], s: ["forearms"], anim: "curl" },
+  "Preacher Curl":            { g: "arms", eq: "machine", t: "3 × 10", p: ["biceps"], s: ["forearms"], anim: "curl" },
+  "Triceps Pushdown (Cable)": { g: "arms", eq: "cable", t: "3 × 12", p: ["triceps"], s: ["forearms"], anim: "pushdown" },
+  "Overhead Triceps Extension": { g: "arms", eq: "cable", t: "3 × 12", p: ["triceps"], s: ["forearms"], anim: "pushdown" },
+  "Skullcrusher":             { g: "arms", eq: "barbell", t: "3 × 10", p: ["triceps"], s: ["forearms"], anim: "benchPress" },
+  "Bench Dips":               { g: "arms", eq: "body", t: "3 × 12", p: ["triceps"], s: ["delts", "chest"], anim: "pushup", bodyweight: true },
+
+  /* ---- BACAK ---- */
+  "Leg Press":                { g: "legs", eq: "machine", t: "3 × 12", p: ["quads", "glutes"], s: ["hamstrings", "calves"], anim: "legPress" },
+  "Squat (Barbell)":          { g: "legs", eq: "barbell", t: "3 × 8",  p: ["quads", "glutes"], s: ["hamstrings", "lowerBack", "abs"], anim: "squat" },
+  "Goblet Squat":             { g: "legs", eq: "dumbbell", t: "3 × 12", p: ["quads", "glutes"], s: ["hamstrings", "abs"], anim: "squat" },
+  "Leg Extension":            { g: "legs", eq: "machine", t: "3 × 12", p: ["quads"], s: [], anim: "legExt" },
+  "Leg Curl":                 { g: "legs", eq: "machine", t: "3 × 12", p: ["hamstrings"], s: ["calves"], anim: "legCurl" },
+  "Romanian Deadlift":        { g: "legs", eq: "barbell", t: "3 × 10", p: ["hamstrings", "glutes"], s: ["lowerBack"], anim: "deadlift" },
+  "Dambıl Lunge":             { g: "legs", eq: "dumbbell", t: "3 × 12", p: ["quads", "glutes"], s: ["hamstrings"], anim: "squat" },
+  "Bulgarian Split Squat":    { g: "legs", eq: "dumbbell", t: "3 × 10", p: ["quads", "glutes"], s: ["hamstrings"], anim: "squat" },
+  "Calf Raise Machine":       { g: "legs", eq: "machine", t: "3 × 15", p: ["calves"], s: [], anim: "calfRaise" },
+  "Hip Thrust":               { g: "legs", eq: "barbell", t: "3 × 10", p: ["glutes"], s: ["hamstrings"], anim: "hipThrust" },
+
+  /* ---- KARIN ---- */
+  "Plank":                    { g: "core", eq: "body", t: "3 × 45 sn", p: ["abs"], s: ["obliques", "lowerBack"], anim: "plank", bodyweight: true },
+  "Crunch":                   { g: "core", eq: "body", t: "3 × 20", p: ["abs"], s: [], anim: "crunch", bodyweight: true },
+  "Leg Raise":                { g: "core", eq: "body", t: "3 × 15", p: ["abs"], s: ["obliques"], anim: "crunch", bodyweight: true },
+  "Russian Twist":            { g: "core", eq: "body", t: "3 × 20", p: ["obliques"], s: ["abs"], anim: "crunch", bodyweight: true },
+  "Cable Crunch":             { g: "core", eq: "cable", t: "3 × 15", p: ["abs"], s: ["obliques"], anim: "crunch" },
+  "Mountain Climber":         { g: "core", eq: "body", t: "3 × 30 sn", p: ["abs"], s: ["obliques", "delts"], anim: "plank", bodyweight: true }
 };
 
 /* ---------- vücut haritası (ön/arka anatomik silüet) ---------- */
@@ -516,7 +568,138 @@ const ANIMS = {
        <animate attributeName="opacity" values="0.25;1;0.25" dur="${DUR}" repeatCount="indefinite"/>
      </g>`,
     "VÜCUT AĞIRLIĞI • MAT"
-  )
+  ),
+
+  /* BENCH PRESS — sırtüstü, yan */
+  benchPress: () => {
+    const bench =
+      `<rect class="an-pad" x="34" y="100" width="92" height="9" rx="4"/>` +
+      frameL("M48 142 V106 M112 142 V106");
+    const body =
+      seg(58, 96, 108, 96, 14, 12) +
+      `<circle class="fx" cx="46" cy="94" r="8"/>` +
+      `<path class="an-hair" d="M38 92 A8 8 0 0 1 54 92 Z" transform="rotate(-90 46 92)"/>` +
+      shortsS(98, 88, 17, 12) +
+      leg(112, 96, 130, 112, 130, 134) + footS(130, 135, 1) +
+      mus(70, 92);
+    const A = body +
+      arm(64, 92, 76, 78, 72, 66) +
+      acc("M58 64 H90", 5) + dbSide(72, 60) +
+      arrow(104, 66, 104, 38);
+    const B = body +
+      arm(64, 92, 68, 68, 66, 44) +
+      acc("M52 42 H84", 5) + dbSide(66, 38);
+    return wrap(bench + frames(A, B), "BENCH • BARBELL");
+  },
+
+  /* SQUAT — yan */
+  squat: () => {
+    const barA = acc("M56 46 H100", 5) + dbSide(76, 44);
+    const barB = acc("M60 66 H104", 5) + dbSide(80, 64);
+    const A =
+      leg(80, 90, 80, 112, 80, 134) + footS(80, 135) +
+      shortsS(72, 82, 16, 12) + torsoS(80, 50, 88, 1) + headP(80, 30) +
+      arm(80, 52, 90, 58, 76, 48) + mus(84, 104) + barA +
+      arrow(122, 70, 122, 98);
+    const B =
+      leg(72, 106, 96, 110, 90, 134) + footS(90, 135) +
+      shortsS(64, 98, 16, 12) + seg(84, 70, 72, 106, 15, 13) +
+      `<circle class="fx" cx="89" cy="78" r="5"/>` + headP(88, 52) +
+      arm(84, 72, 94, 76, 82, 68) + mus(84, 116) + barB;
+    return wrap(frames(A, B), "BARBELL • SQUAT");
+  },
+
+  /* DEADLIFT — yan */
+  deadlift: () => {
+    const A =
+      leg(70, 96, 78, 116, 74, 134) + footS(74, 135) +
+      shortsS(62, 88, 16, 12) + seg(88, 64, 70, 96, 15, 13) +
+      `<circle class="fx" cx="92" cy="72" r="5"/>` + headP(96, 50) +
+      arm(88, 66, 94, 92, 98, 114) +
+      acc("M84 118 H112", 5) + `<circle class="an-iron" cx="98" cy="122" r="9"/>` +
+      mus(76, 92) + arrow(128, 108, 128, 76);
+    const B =
+      leg(76, 92, 78, 114, 76, 134) + footS(76, 135) +
+      shortsS(68, 84, 16, 12) + torsoS(76, 50, 88, 1) + headP(76, 32) +
+      arm(76, 54, 80, 76, 82, 96) +
+      acc("M68 100 H96", 5) + `<circle class="an-iron" cx="82" cy="104" r="9"/>` +
+      mus(72, 84);
+    return wrap(frames(A, B), "BARBELL");
+  },
+
+  /* PULL-UP — önden, bar */
+  pullup: () => {
+    const rig = frameL("M30 142 V16 M170 142 V16") + acc("M30 18 H170", 5);
+    const fig = dy =>
+      torsoF(100, 58 + dy, 92 + dy) + shortsF(100, 92 + dy) + headP(100, 38 + dy) +
+      leg(94, 104 + dy, 92, 120 + dy, 100, 130 + dy, false) +
+      leg(106, 104 + dy, 108, 120 + dy, 100, 130 + dy, true) +
+      mus(88, 66 + dy) + mus(112, 66 + dy);
+    const A = fig(14) +
+      arm(87, 74, 85, 46, 84, 22) + arm(113, 74, 115, 46, 116, 22) +
+      arrow(150, 70, 150, 42);
+    const B = fig(-16) +
+      arm(87, 44, 76, 34, 84, 22) + arm(113, 44, 124, 34, 116, 22);
+    return wrap(rig + frames(A, B), "BAR • VÜCUT AĞIRLIĞI");
+  },
+
+  /* PUSH-UP — yan */
+  pushup: () => {
+    const mat = `<rect class="an-pad" x="24" y="132" width="152" height="6" rx="3"/>`;
+    const A =
+      seg(56, 88, 124, 96, 14, 12) + headP(46, 80) +
+      shortsS(96, 88, 18, 12) +
+      leg(124, 96, 148, 106, 162, 112) + footS(162, 108, 1) +
+      arm(58, 90, 56, 110, 54, 128) +
+      mus(70, 86) + arrow(96, 66, 96, 46);
+    const B =
+      seg(56, 108, 124, 110, 14, 12) + headP(46, 100) +
+      shortsS(96, 102, 18, 12) +
+      leg(124, 110, 148, 116, 162, 120) + footS(162, 116, 1) +
+      arm(58, 110, 44, 118, 54, 128) +
+      mus(70, 106);
+    return wrap(mat + frames(A, B), "VÜCUT AĞIRLIĞI");
+  },
+
+  /* CRUNCH — sırtüstü, dizler bükülü */
+  crunch: () => {
+    const mat = `<rect class="an-pad" x="28" y="126" width="144" height="6" rx="3"/>`;
+    const legs =
+      leg(104, 116, 122, 94, 136, 118) + footS(136, 119, 1) +
+      shortsS(94, 106, 18, 12);
+    const A = legs +
+      seg(58, 120, 104, 116, 14, 12) +
+      `<circle class="fx" cx="46" cy="118" r="8"/>` +
+      arm(60, 116, 74, 106, 86, 102) +
+      mus(82, 112) + arrow(52, 96, 66, 82);
+    const B = legs +
+      seg(70, 102, 104, 116, 14, 12) +
+      `<circle class="fx" cx="62" cy="92" r="8"/>` +
+      arm(72, 100, 84, 94, 94, 96) +
+      mus(88, 108);
+    return wrap(mat + frames(A, B), "MAT • VÜCUT AĞIRLIĞI");
+  },
+
+  /* HIP THRUST — sırt bench'te, kalça köprüsü */
+  hipThrust: () => {
+    const bench = `<rect class="an-pad" x="30" y="92" width="34" height="9" rx="4"/>` +
+      frameL("M38 142 V98 M56 142 V98");
+    const A = bench +
+      seg(56, 92, 92, 116, 14, 12) +
+      `<circle class="fx" cx="46" cy="86" r="8"/>` +
+      shortsS(84, 108, 17, 12) +
+      leg(92, 116, 118, 112, 120, 134) + footS(120, 135, 1) +
+      acc("M78 104 H110", 5) + `<circle class="an-iron" cx="94" cy="104" r="8"/>` +
+      mus(94, 122) + arrow(140, 116, 140, 92);
+    const B = bench +
+      seg(56, 90, 100, 92, 14, 12) +
+      `<circle class="fx" cx="46" cy="84" r="8"/>` +
+      shortsS(92, 84, 17, 12) +
+      leg(100, 92, 118, 108, 120, 134) + footS(120, 135, 1) +
+      acc("M84 80 H116", 5) + `<circle class="an-iron" cx="100" cy="80" r="8"/>` +
+      mus(100, 98);
+    return wrap(frames(A, B), "BENCH • BARBELL");
+  }
 };
 
 /* Hareket detay bloğu (kart içine gömülür) */
