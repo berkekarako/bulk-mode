@@ -910,5 +910,17 @@ checkReminders();
 
 /* ---------- service worker ---------- */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    // uygulama öne gelince güncelleme kontrolü
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") reg.update().catch(() => {});
+    });
+  }).catch(() => {});
+
+  // yeni sürüm devraldığında sayfayı bir kez tazele (ilk kurulumda değil)
+  let hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController) { hadController = true; return; }
+    location.reload();
+  });
 }

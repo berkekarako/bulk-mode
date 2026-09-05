@@ -1,5 +1,5 @@
 /* Bulk Mode — service worker */
-const CACHE = "bulk-tracker-v11";
+const CACHE = "bulk-tracker-v12";
 const ASSETS = [
   "./",
   "./index.html",
@@ -33,7 +33,7 @@ self.addEventListener("fetch", e => {
   // Sayfa (HTML) istekleri: önce ağ — güncelleme anında görünür; ağ yoksa önbellek
   if (e.request.mode === "navigate") {
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: "no-cache" })
         .then(res => {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put("./index.html", clone));
