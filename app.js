@@ -2,10 +2,24 @@
 "use strict";
 
 /* ---------- gerçek ekran yüksekliği ----------
-   iOS tam ekran PWA'da 100%/100dvh ekranın tamamını vermeyebiliyor
-   (altta boşluk kalıyor); yüksekliği ölçüp CSS değişkenine yazıyoruz. */
+   iOS 26 hatası (26.1'de düzeltildi): tam ekran PWA'da görüntü alanı,
+   Safari arayüzü oradaymış gibi ~90pt kısa bildiriliyor. Tam ekran
+   moddayken bildirilen yükseklik ekrandan biraz kısaysa (hayalet araç
+   çubuğu payı) ekran yüksekliğini kullan; büyük farklar (klavye,
+   bölünmüş ekran) olduğu gibi bırakılır. */
 function syncAppHeight() {
-  document.documentElement.style.setProperty("--app-h", window.innerHeight + "px");
+  let h = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
+  const standalone = navigator.standalone === true ||
+    (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  if (standalone && window.screen) {
+    const landscape = window.innerWidth > window.innerHeight;
+    const scrH = landscape
+      ? Math.min(screen.width, screen.height)
+      : Math.max(screen.width, screen.height);
+    const gap = scrH - h;
+    if (gap > 0 && gap <= 160) h = scrH;
+  }
+  document.documentElement.style.setProperty("--app-h", h + "px");
 }
 syncAppHeight();
 window.addEventListener("resize", syncAppHeight);
